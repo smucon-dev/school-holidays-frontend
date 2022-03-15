@@ -1,35 +1,86 @@
-import { Holiday, HolidayType } from "../app/model";
+import { Holiday, HolidayItem, HolidayType, User } from "../app/model";
+import { buildSK } from '../common/utils/Utils';
+import { appConfig, states, vacationNames } from './config'
 
 
 
 export class DataService {
 
-
-  private states = ["Baden-Württemberg", "Bayern", "Berlin", "Brandenburg", "Bremen", "Hamburg", "Hessen", 
-  "Mecklenburg-Vorpommern", "Niedersachsen", "Nordrhein-Westfalen"," Rheinland-Pfalz", "Saarland", 
-  "Sachsen", "Sachsen-Anhalt", "Schleswig-Holstein", "Thüringen"]
-
-  private vacationNames = ['Winterferien', 'Osterferien', 'Pfingstferien', 'Sommerferien', 'Herbstferien', 'Weihnachtsferien']
-
+  private user: User | undefined
 
   /**
-   * getStates
+   * setUser
    */
-  public getStates() {
-    return this.states
+  public setUser(user: User) {
+    this.user = user
+  }
+  
+  // get id token from cognito user
+  private getUserIdToken(){
+    if (this.user) {
+        return this.user.cognitoUser.getSignInUserSession()!.getIdToken().getJwtToken()
+    } else {
+        return '';
+    }
+}
+
+  // add holiday
+  public async addHoliday(holiday: HolidayItem) {
+
+    const url = appConfig.api.holidayURL
+    const requestOptions: RequestInit = {
+      method: 'POST',
+      headers: {
+        'Authorization': this.getUserIdToken()
+      },
+      body: JSON.stringify(holiday)
+    }
+    
+    await fetch(url, requestOptions).catch(error => console.log(error))
   }
 
+  // delete holiday
+  public async deleteHoliday(state: string, start: string, end: string) {
+      const url = `${appConfig.api.holidayURL}?State=${state}&SK=${buildSK(start, end)}`
+      console.log(url);
+      const requestOptions: RequestInit = {
+        method: 'DELETE',
+        headers: {
+          'Authorization': this.getUserIdToken()
+        }
+      }
+      await fetch(url, requestOptions).catch(error => console.log(error))
+  }
 
   /**
    * getHolidays as a map where key: state and value: holiday
    */
   public async getHolidays(year: string, type: HolidayType): Promise<Map<string, Holiday[]>> {
 
-    // generate test data
+    const url = new URL(appConfig.api.holidayURL)
+    const params: any = { "SK": year, "Type": type }
+    Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
+    
+    const result = await fetch(url.toString())
+    const responseJSON = await result.json()
+    const holidays: Holiday[] = []
+    if (responseJSON['Items']) {
+      responseJSON['Items'].forEach((item: HolidayItem) => {
+        const holiday: Holiday = {
+          state: item.State,
+          start: item.StartDate,
+          end: item.EndDate,
+          name: item.Name,
+          type: item.Type
+        }
+        holidays.push(holiday)
+      })
+    }
+    
+    // initialize with placeholder holidays
     const holidayMap = new Map<string, Holiday[]>()
-    this.states.forEach(state => {
-      // initialize with placeholder holidays
-      const holidayArray =this.vacationNames.map(name => {
+    Array.from(states.keys()).forEach(state => {
+      const holidayArray = vacationNames.map((name: string) => {
         return {
           state: state,
           start: '',
@@ -41,24 +92,10 @@ export class DataService {
       holidayMap.set(state, holidayArray)
     })
 
-    // simulate fetched data if one exists
-    const holidayArr: Holiday[] = []
-    this.states.forEach(state => {
-      this.vacationNames.forEach(vacationName => {
-        holidayArr.push({
-          state: state,
-          start: vacationName === 'Pfingstferien' ? '' : '20220401',
-          end: vacationName === 'Pfingstferien' ? '' : '20220413',
-          name: vacationName,
-          type: 'Ferien'
-        })
-      })
-    });
-
     // merge placeholder data with fetched data
-    holidayArr.forEach(holiday => {
+    holidays.forEach(holiday => {
       const stateHolidays = holidayMap.get(holiday.state)
-      const arrayIndex = this.vacationNames.indexOf(holiday.name)
+      const arrayIndex = vacationNames.indexOf(holiday.name)
       if (stateHolidays && arrayIndex > -1 && arrayIndex < stateHolidays.length) {
         stateHolidays[arrayIndex] = holiday
       }

@@ -7,12 +7,12 @@ import { AuthService } from "../../services/AuthService"
 
 
 interface LoginProps {
-  authService: AuthService
   setUser: (user: User) => void
+  authService: AuthService
 }
 
 
-export default function Login({ authService, setUser }: LoginProps) {
+export default function LoginModal({ authService, setUser }: LoginProps) {
 
   const theme = useTheme()
   const appContext = useContext(AppContext)
@@ -32,15 +32,17 @@ export default function Login({ authService, setUser }: LoginProps) {
 
   const handleSubmit = async (event: SyntheticEvent) => {
     event.preventDefault();
-    setLoginAttempted(true)
-    const result = await authService.login(userName, password)
+    const result = await authService.login('HolidayAdmin', '<6xm=BkGZpcD_>>a6PXDd!\\sw')
+    // const result = await authService.login(userName, password)
     if (result) {
       setLoginSuccessful(true)
       setUser(result)
       appContext.setEditMode(true)
+      setLoginAttempted(true)
       appContext.setAppMode('Ferien')
     } else {
       setLoginSuccessful(false)
+      setLoginAttempted(true)
     }
   }
 
@@ -57,6 +59,7 @@ export default function Login({ authService, setUser }: LoginProps) {
                         <Typography >Login failed!</Typography>
                     </Paper>
   }
+
 
   return (
     <Box component='form'

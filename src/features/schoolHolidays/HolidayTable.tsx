@@ -2,6 +2,7 @@ import { Box } from "@mui/material";
 import { ReactElement, useContext, useEffect, useState } from "react";
 import { AppContext } from "../../App";
 import { Holiday } from "../../app/model";
+import InputModal from "../../common/InputModal";
 import { DataService } from "../../services/DataService";
 import HolidayTableHeader from "./HolidayTableHeader";
 import HolidayTableRow from "./HolidayTableRow";
@@ -18,6 +19,11 @@ export default function HolidayTable({ year, dataService }: HolidayTableProps) {
   const appContext = useContext(AppContext)
   const [holidays, setHolidays] = useState<Map<string, Holiday[]>>()
 
+  const refeshFromDb = async() => {
+    const data = await dataService.getHolidays(year.toString(), 'Ferien')
+    setHolidays(data)
+  }
+
   useEffect(() => {
     const fetchData = async () => {
       const data = await dataService.getHolidays(year.toString(), 'Ferien')
@@ -26,16 +32,20 @@ export default function HolidayTable({ year, dataService }: HolidayTableProps) {
     fetchData()
   }, [year, dataService])
 
+  console.log('render table')
 
   return (
-    <Box
-      sx={{
-        width: '100%'
-      }}
-      >
-      <HolidayTableHeader editMode={appContext.editMode}/>
-      {holidays && createTableRows(holidays)}
-    </Box>
+    <>
+      <Box
+        sx={{
+          width: '100%'
+        }}
+        >
+        <HolidayTableHeader editMode={appContext.editMode}/>
+        {holidays && createTableRows(holidays)}
+      </Box>
+      {appContext.editMode && appContext.activeHoliday && <InputModal dataService={dataService}/>}
+    </>
   )
 
 }

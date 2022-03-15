@@ -2,9 +2,9 @@ import { Box, useTheme } from "@mui/material";
 import { useContext } from "react";
 import { AppContext } from "../../App";
 import { Holiday } from "../../app/model";
-import TableItem from "../../common/TableItem";
 import TableRowHeader from "../../common/TableRowHeader";
 import HolidayComponent from "./HolidayComponent";
+import { states } from "../../services/config"
 
 
 interface HolidayTableRowProps {
@@ -32,7 +32,7 @@ export default function HolidayTableRow({ holidays }: HolidayTableRowProps) {
       }}
     >
       <div></div>
-      <TableRowHeader>{holidays[0].state}</TableRowHeader>
+      <TableRowHeader>{states.get(holidays[0].state)}</TableRowHeader>
       <HolidayComponent holiday={holidays[0]} />
       <HolidayComponent holiday={holidays[1]} />
       <HolidayComponent holiday={holidays[2]} />
