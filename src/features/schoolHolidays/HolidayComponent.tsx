@@ -21,9 +21,15 @@ export default function HolidayComponent({ holiday }: HolidayComponentProps) {
     }
   }
 
+  const handleClick = () => {
+    if (appContext.editMode) {
+      appContext.setActiveHoliday(holiday)
+    }
+  }
+
   return (
     <Typography 
-      onClick={() => appContext.setActiveHoliday(holiday)}
+      onClick={() => handleClick()}
       sx={{fontFamily: 'Raleway'
       }}>
       {formattedDate(holiday.start, holiday.end)}

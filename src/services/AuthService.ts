@@ -1,5 +1,5 @@
 import { User } from "../app/model"
-import Amplify, { Auth } from 'aws-amplify'
+import { Amplify, Auth } from 'aws-amplify'
 import { appConfig } from './config'
 import { CognitoUser } from '@aws-amplify/auth'
 
@@ -21,6 +21,7 @@ export class AuthService {
     
     try {
       const user = await Auth.signIn(userName, password) as CognitoUser
+      console.log(user.getSignInUserSession()?.getIdToken().getJwtToken())
       return {
         userName: user.getUsername(),
         cognitoUser: user
@@ -28,6 +29,10 @@ export class AuthService {
     } catch {
       return undefined
     }
+  }
+
+  public refreshToken() {
+    Auth.currentSession().catch(err => console.log(err))
   }
 
 }

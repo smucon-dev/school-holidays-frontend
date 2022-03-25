@@ -46,5 +46,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "babel-core": "^7.0.0-bridge.0",
+    "babel-jest": "^27.5.1",
+    "ts-jest": "^27.1.3"
   }
 }

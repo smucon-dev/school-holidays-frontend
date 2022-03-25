@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Holiday App",
+  "name": "app for school holidays and public holidays",
   "icons": [],
   "start_url": ".",
   "display": "standalone",

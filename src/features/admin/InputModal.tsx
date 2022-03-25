@@ -1,18 +1,20 @@
 import { Box, Button, Modal, Paper, TextField, Typography } from "@mui/material";
 import { useContext, useState } from "react";
-import { AppContext } from "../App";
-import { DataService } from "../services/DataService";
-import { states } from '../services/config'
-import { buildSK, convertDbDate, convertToDbDate } from './utils/Utils'
-import { HolidayItem } from "../app/model";
+import { AppContext } from "../../App";
+import { DataService } from "../../services/DataService";
+import { states } from '../../services/config'
+import { buildSK, convertDbDate, convertToDbDate } from '../../common/utils/Utils'
+import { Holiday, HolidayItem } from "../../app/model";
 
 
 interface InputModalProps {
   dataService: DataService
+  updateHolidays: (holiday: Holiday) => void
+  year: string
 }
 
 
-export default function InputModal({ dataService }: InputModalProps) {
+export default function InputModal({ dataService, updateHolidays, year }: InputModalProps) {
 
   const appContext = useContext(AppContext)
   const holiday = appContext.activeHoliday
@@ -20,8 +22,8 @@ export default function InputModal({ dataService }: InputModalProps) {
   const convertedStartDate = holiday && holiday.start ? convertDbDate(holiday.start) : ''
   const convertedEndDate = holiday && holiday.end ? convertDbDate(holiday.end) : ''
 
-  const [start, setStart] = useState(convertedStartDate)
-  const [end, setEnd] = useState(convertedEndDate)
+  const [start, setStart] = useState(convertedStartDate.slice(0, 6))
+  const [end, setEnd] = useState(convertedEndDate.slice(0, 6))
   const [startError, setStartError] = useState(false)
   const [endError, setEndError] = useState(false)
 
@@ -42,7 +44,7 @@ export default function InputModal({ dataService }: InputModalProps) {
 
   const validateStartDate = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const value = e.target.value
-    if(!value.match(/^\d\d\.\d\d\.\d\d\d\d$/)) {
+    if(!value.match(/^\d\d\.\d\d\.$/)) {
       setStartError(true)
     } else {
       setStartError(false)
@@ -51,29 +53,38 @@ export default function InputModal({ dataService }: InputModalProps) {
 
   const validateEndDate = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const value = e.target.value
-    if(!value.match(/^\d\d\.\d\d\.\d\d\d\d$/)) {
+    if(!value.match(/^\d\d\.\d\d\.$/)) {
       setEndError(true)
     } else {
       setEndError(false)
     }
   }
 
-  const handleSubmit = () => {
-    // to be refactored
-    const newHolidayItem: HolidayItem = {
-      State: holiday!.state,
-      SK: buildSK(start, end),
-      StartDate: convertToDbDate(start),
-      EndDate: convertToDbDate(end),
-      Name: holiday!.name,
-      Type: holiday!.type
+  const handleSubmit = async () => {
+
+    const newHoliday: Holiday = {
+      state: holiday!.state,
+      start: convertToDbDate(start + year),
+      end: convertToDbDate(end + year),
+      name: holiday!.name,
+      type: holiday!.type
     }
-    dataService.addHoliday(newHolidayItem)
+    
+    updateHolidays(newHoliday)
     appContext.setActiveHoliday(undefined)
   }
 
-  const handleDelete = () => {
-    dataService.deleteHoliday(holiday!.state, start, end)
+  const handleDelete = async () => {
+
+    const newHoliday: Holiday = {
+      state: holiday!.state,
+      start: '',
+      end: '',
+      name: holiday!.name,
+      type: holiday!.type
+    }
+
+    updateHolidays(newHoliday)
     appContext.setActiveHoliday(undefined)
   }
 
@@ -93,7 +104,7 @@ export default function InputModal({ dataService }: InputModalProps) {
       >
         <Paper
           sx={{
-            backgroundColor: 'rgba(64, 64, 64, 1)',
+            backgroundColor: 'rgba(104, 104, 104, 1)',
             display: 'grid',
             gridTemplateRows: '1.25fr repeat(7, 1fr) 0.4fr',
             height: height,
@@ -124,18 +135,19 @@ export default function InputModal({ dataService }: InputModalProps) {
                     inputProps={tfInputProps} 
                     sx={{width: '60%'}}/>
           {/* Start */}
-          <TextField key='Start' label='Start' 
+          <TextField key='Start' label='Beginn TT.MM.' 
+                    autoFocus
                     error={startError}
-                    helperText={startError ? 'DD.MM.YYYY' : ''}
+                    helperText={startError ? 'TT.MM.' : ''}
                     value={start}
                     onChange={(e) => handleStartChange(e)}
                     onBlur={(e) => validateStartDate(e)}
                     inputProps={tfInputProps} 
                     sx={{width: '60%'}}/>
           {/* End */}
-          <TextField key='Ende' label='Ende' 
+          <TextField key='Ende' label='Ende TT.MM.' 
                     error={endError}
-                    helperText={endError ? 'DD.MM.YYYY' : ''}
+                    helperText={endError ? 'TT.MM.' : ''}
                     value={end}
                     onChange={(e) => handleEndChange(e)}
                     onBlur={(e) => validateEndDate(e)}
@@ -144,10 +156,12 @@ export default function InputModal({ dataService }: InputModalProps) {
 
           <Button onClick={() => handleDelete()}
                   variant='contained' 
+                  disabled={startError || endError}
                   color='secondary' 
                   sx={{height: '80%', width: '60%'}}>Delete</Button>
           <Button onClick={() => handleSubmit()}
                   variant='contained' 
+                  disabled={startError || endError}
                   sx={{height: '80%', width: '60%'}}>Save</Button>
         </Paper>
       </Box>

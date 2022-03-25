@@ -1,0 +1,21 @@
+{
+	"roots": [
+		"<rootDir>"
+	],
+	"transform": {
+		"\\.(ts|tsx)?$": "ts-jest",
+		"\\.(js|jsx)?$": "./jestTransform.js"
+	},
+	"transformIgnorePatterns": [
+		"node_modules/(?!(redux-persist)/)"
+	],
+	"testRegex": "(/__tests__/.*|(\\.|/)(spec))\\.tsx?$",
+	"moduleFileExtensions": [
+		"ts",
+		"tsx",
+		"js",
+		"jsx",
+		"json",
+		"node"
+	]
+}

@@ -9,6 +9,7 @@ interface HeaderProps {
   activeYear: number,
   setActiveYear: (year: number) => void,
   years: number[]
+  setShowLoginModal: (show: boolean) => void
 }
 
 
@@ -26,9 +27,6 @@ export default function Header(props: HeaderProps) {
       break
     case 'Ferien':
       headline='Ferien'
-      break
-    case 'Login':
-      headline='Login'
       break
     
   }
@@ -73,15 +71,12 @@ export default function Header(props: HeaderProps) {
                   >
             Feiertage
           </Button>}
-          
-          {/* back button */}
-          {appMode === 'Login' && <ArrowBackIosNewIcon onClick={() => setAppMode('Ferien')}/>}
 
       </Box>
 
       {/* Headline */}
       <Typography
-        onClick={() => setAppMode('Login')}
+        onClick={() => props.setShowLoginModal(true)}
         sx={{
           fontSize: '2.5rem',
           justifySelf: 'center'

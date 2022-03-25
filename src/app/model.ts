@@ -6,12 +6,13 @@ export interface IAppContext {
   editMode: boolean
   setEditMode: (editMode: boolean) => void
   activeHoliday: Holiday | undefined
-  setActiveHoliday: (holiday: Holiday | undefined) => void
+  setActiveHoliday: (holiday: Holiday | undefined) => void,
+  year: number
 }
 
 export type HolidayType = 'Ferien' | 'Feiertag' | 'Schulfrei'
 
-export type AppMode = 'Ferien' | 'Feiertag' | 'Login'
+export type AppMode = 'Ferien' | 'Feiertag'
 
 export interface User {
   userName: string,
@@ -27,7 +28,7 @@ export interface Holiday {
 }
 
 export interface HolidayItem {
-  State: string,
+  PK: string,
   SK: string,
   StartDate: string,
   EndDate: string,

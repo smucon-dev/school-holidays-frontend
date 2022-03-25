@@ -21,3 +21,15 @@ export function convertToDbDate(date: string) {
 export function buildSK(startDate: string, endDate: string) {
   return convertToDbDate(startDate) + '_' + convertToDbDate(endDate)
 }
+
+// split array into batches
+export function createBatches(data: any[], batchSize: number) {
+
+  const numBatches = Math.ceil(data.length / batchSize)
+  const batches: any[][] = []
+  for (let b = 0; b < numBatches; b++) {
+    batches.push(data.slice(b*batchSize, (b+1)*batchSize))
+  }
+
+  return batches
+}
